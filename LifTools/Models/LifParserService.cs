@@ -117,6 +117,7 @@ public class LifParserService
             Affiliation = record.Affiliation ?? string.Empty,
             FinishTimeRaw = rawTime,
             FinishTimeFormatted = formattedTime,
+            FinishTime = new FinishTime(rawTime),
             License = record.License ?? string.Empty,
             DeltaTime = record.DeltaTime ?? string.Empty,
             ReacTime = record.ReacTime ?? string.Empty,

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Threading.Tasks;
@@ -26,11 +25,7 @@ public partial class MainWindowViewModel : ViewModelBase
 
     public MainWindowViewModel()
     {
-        Console.WriteLine("MainWindowViewModel constructor called");
-        Console.WriteLine($"Initial TimeFormatMode: {_timeFormatMode}");
     }
-
-    public string Greeting { get; } = "Welcome to LifTools!";
     
     public string SelectedFilePath
     {
@@ -55,10 +50,8 @@ public partial class MainWindowViewModel : ViewModelBase
         get => _timeFormatMode;
         set
         {
-            Console.WriteLine($"TimeFormatMode changing from {_timeFormatMode} to {value}");
             if (SetProperty(ref _timeFormatMode, value))
             {
-                Console.WriteLine("Calling RefreshRacersDisplay()");
                 RefreshRacersDisplay();
                 // Notify that the boolean properties have changed
                 OnPropertyChanged(nameof(IsRawTimeFormat));
@@ -71,13 +64,10 @@ public partial class MainWindowViewModel : ViewModelBase
     { 
         get 
         {
-            var result = _timeFormatMode == TimeFormatMode.Raw;
-            Console.WriteLine($"IsRawTimeFormat getter called, returning {result}");
-            return result;
+            return _timeFormatMode == TimeFormatMode.Raw;
         }
         set
         {
-            Console.WriteLine($"IsRawTimeFormat setter called with value {value}");
             if (value)
             {
                 TimeFormatMode = TimeFormatMode.Raw;
@@ -89,13 +79,10 @@ public partial class MainWindowViewModel : ViewModelBase
     { 
         get 
         {
-            var result = _timeFormatMode == TimeFormatMode.Formatted;
-            Console.WriteLine($"IsFormattedTimeFormat getter called, returning {result}");
-            return result;
+            return _timeFormatMode == TimeFormatMode.Formatted;
         }
         set
         {
-            Console.WriteLine($"IsFormattedTimeFormat setter called with value {value}");
             if (value)
             {
                 TimeFormatMode = TimeFormatMode.Formatted;
@@ -107,12 +94,10 @@ public partial class MainWindowViewModel : ViewModelBase
     
     private void RefreshRacersDisplay()
     {
-        Console.WriteLine($"RefreshRacersDisplay called. TimeFormatMode = {_timeFormatMode}");
         // Update the DisplayFinishTime for each racer based on the current format mode
         foreach (var racer in Racers)
         {
             racer.DisplayFinishTime = _timeFormatMode == TimeFormatMode.Raw ? racer.FinishTimeRaw : racer.FinishTimeFormatted;
-            Console.WriteLine($"Racer {racer.FirstName}: DisplayFinishTime = {racer.DisplayFinishTime}");
         }
     }
     

@@ -28,6 +28,9 @@ public class Racer : IComparable<Racer>, INotifyPropertyChanged
             }
         }
     }
+    
+    // Sortable finish time property that compares by raw seconds
+    public FinishTime FinishTime { get; set; } = new FinishTime(string.Empty);
     public string License { get; set; } = string.Empty;
     public string DeltaTime { get; set; } = string.Empty;
     public string ReacTime { get; set; } = string.Empty;

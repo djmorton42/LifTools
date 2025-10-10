@@ -30,17 +30,8 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         
-        <!-- Header -->
-        <TextBlock Text="{Binding Greeting}" 
-                   HorizontalAlignment="Center" 
-                   VerticalAlignment="Center"
-                   Grid.Row="0"
-                   FontSize="18"
-                   FontWeight="Bold"
-                   Margin="10"/>
-        
         <!-- File Selection -->
-        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="10">
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="10">
             <TextBlock Text="LIF File:" VerticalAlignment="Center" Margin="0,0,10,0"/>
             <TextBox Text="{Binding SelectedFilePath}" 
                      Width="400" 
@@ -116,7 +107,7 @@
                             <DataGridTextColumn Header="First Name" Binding="{Binding FirstName}" Width="130"/>
                             <DataGridTextColumn Header="Last Name" Binding="{Binding LastName}" Width="130"/>
                             <DataGridTextColumn Header="Affiliation" Binding="{Binding Affiliation}" Width="180"/>
-                            <DataGridTemplateColumn Header="Finish Time" Width="130">
+                            <DataGridTemplateColumn Header="Finish Time" Width="130" SortMemberPath="FinishTime">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <Grid>
