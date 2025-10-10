@@ -104,6 +104,9 @@ public class LifParserService
             throw new InvalidOperationException("Failed to parse racer line");
         }
 
+        var finishTime = record.FinishTime ?? string.Empty;
+        var rawTime = ParseTimeToSeconds(finishTime);
+        var formattedTime = FormatTime(rawTime);
         return new Racer
         {
             Position = new Position(record.Position ?? string.Empty),
@@ -112,7 +115,8 @@ public class LifParserService
             LastName = record.LastName ?? string.Empty,
             FirstName = record.FirstName ?? string.Empty,
             Affiliation = record.Affiliation ?? string.Empty,
-            FinishTime = record.FinishTime ?? string.Empty,
+            FinishTimeRaw = rawTime,
+            FinishTimeFormatted = formattedTime,
             License = record.License ?? string.Empty,
             DeltaTime = record.DeltaTime ?? string.Empty,
             ReacTime = record.ReacTime ?? string.Empty,
@@ -124,6 +128,63 @@ public class LifParserService
             Unused4 = record.Unused4 ?? string.Empty,
             Unused5 = record.Unused5 ?? string.Empty
         };
+    }
+
+    private static string ParseTimeToSeconds(string timeString)
+    {
+        if (string.IsNullOrEmpty(timeString))
+        {
+            return string.Empty;
+        }
+        
+        // Try to parse as already raw seconds (e.g., "46.529")
+        if (double.TryParse(timeString, out double rawSeconds))
+        {
+            return rawSeconds.ToString("F3");
+        }
+        
+        // Try to parse as formatted time (e.g., "1:55.893")
+        if (timeString.Contains(':'))
+        {
+            var parts = timeString.Split(':');
+            if (parts.Length == 2 && 
+                int.TryParse(parts[0], out int minutes) && 
+                double.TryParse(parts[1], out double seconds))
+            {
+                var totalSeconds = minutes * 60 + seconds;
+                return totalSeconds.ToString("F3");
+            }
+        }
+        
+        // Return original if parsing fails
+        return timeString;
+    }
+
+    private static string FormatTime(string rawSecondsString)
+    {
+        if (string.IsNullOrEmpty(rawSecondsString))
+        {
+            return rawSecondsString;
+        }
+        
+        // Try to parse the raw seconds
+        if (double.TryParse(rawSecondsString, out double totalSeconds))
+        {
+            int minutes = (int)(totalSeconds / 60);
+            double seconds = totalSeconds % 60;
+            
+            // Only show minutes if it's 1 or more
+            if (minutes > 0)
+            {
+                return $"{minutes}:{seconds:00.000}";
+            }
+            else
+            {
+                return $"{seconds:F3}";
+            }
+        }
+        
+        return rawSecondsString; // Return original if parsing fails
     }
 
     // Helper classes for CSV parsing

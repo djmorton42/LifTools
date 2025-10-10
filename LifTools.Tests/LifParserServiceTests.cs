@@ -40,7 +40,7 @@ public class LifParserServiceTests
         Assert.Equal("Smith", firstRacer.LastName);
         Assert.Equal("Jane", firstRacer.FirstName);
         Assert.Equal("Ottawa", firstRacer.Affiliation);
-        Assert.Equal("1:55.893", firstRacer.FinishTime);
+        Assert.Equal("1:55.893", firstRacer.FinishTimeRaw);
         Assert.Equal("1:55.893", firstRacer.DeltaTime);
         Assert.Equal("3.106 (3.106),1:09.119 (1:06.013),1:55.893 (46.774),2:20.991 (25.099)", firstRacer.Splits);
         
@@ -52,7 +52,7 @@ public class LifParserServiceTests
         Assert.Equal("Johnson", secondRacer.LastName);
         Assert.Equal("Alice", secondRacer.FirstName);
         Assert.Equal("Ottawa", secondRacer.Affiliation);
-        Assert.Equal("1:57.058", secondRacer.FinishTime);
+        Assert.Equal("1:57.058", secondRacer.FinishTimeRaw);
         Assert.Equal("1.165", secondRacer.DeltaTime);
     }
 
@@ -146,7 +146,7 @@ public class LifParserServiceTests
         Assert.Equal("Smith", race.Racers[0].LastName);
         Assert.Equal("Jane", race.Racers[0].FirstName);
         Assert.Equal("Ottawa", race.Racers[0].Affiliation);
-        Assert.Equal("1:55.893", race.Racers[0].FinishTime);
+        Assert.Equal("1:55.893", race.Racers[0].FinishTimeRaw);
     }
 
     [Fact]

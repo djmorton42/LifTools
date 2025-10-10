@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Threading.Tasks;
@@ -21,6 +22,13 @@ public partial class MainWindowViewModel : ViewModelBase
     private string _selectedFilePath = string.Empty;
     private Race? _currentRace;
     private bool _isLoading;
+    private TimeFormatMode _timeFormatMode = TimeFormatMode.Raw;
+
+    public MainWindowViewModel()
+    {
+        Console.WriteLine("MainWindowViewModel constructor called");
+        Console.WriteLine($"Initial TimeFormatMode: {_timeFormatMode}");
+    }
 
     public string Greeting { get; } = "Welcome to LifTools!";
     
@@ -42,7 +50,98 @@ public partial class MainWindowViewModel : ViewModelBase
         set => SetProperty(ref _isLoading, value);
     }
     
+    public TimeFormatMode TimeFormatMode
+    {
+        get => _timeFormatMode;
+        set
+        {
+            Console.WriteLine($"TimeFormatMode changing from {_timeFormatMode} to {value}");
+            if (SetProperty(ref _timeFormatMode, value))
+            {
+                Console.WriteLine("Calling RefreshRacersDisplay()");
+                RefreshRacersDisplay();
+                // Notify that the boolean properties have changed
+                OnPropertyChanged(nameof(IsRawTimeFormat));
+                OnPropertyChanged(nameof(IsFormattedTimeFormat));
+            }
+        }
+    }
+    
+    public bool IsRawTimeFormat 
+    { 
+        get 
+        {
+            var result = _timeFormatMode == TimeFormatMode.Raw;
+            Console.WriteLine($"IsRawTimeFormat getter called, returning {result}");
+            return result;
+        }
+        set
+        {
+            Console.WriteLine($"IsRawTimeFormat setter called with value {value}");
+            if (value)
+            {
+                TimeFormatMode = TimeFormatMode.Raw;
+            }
+        }
+    }
+    
+    public bool IsFormattedTimeFormat 
+    { 
+        get 
+        {
+            var result = _timeFormatMode == TimeFormatMode.Formatted;
+            Console.WriteLine($"IsFormattedTimeFormat getter called, returning {result}");
+            return result;
+        }
+        set
+        {
+            Console.WriteLine($"IsFormattedTimeFormat setter called with value {value}");
+            if (value)
+            {
+                TimeFormatMode = TimeFormatMode.Formatted;
+            }
+        }
+    }
+    
     public ObservableCollection<Racer> Racers { get; } = new();
+    
+    private void RefreshRacersDisplay()
+    {
+        Console.WriteLine($"RefreshRacersDisplay called. TimeFormatMode = {_timeFormatMode}");
+        // Update the DisplayFinishTime for each racer based on the current format mode
+        foreach (var racer in Racers)
+        {
+            racer.DisplayFinishTime = _timeFormatMode == TimeFormatMode.Raw ? racer.FinishTimeRaw : racer.FinishTimeFormatted;
+            Console.WriteLine($"Racer {racer.FirstName}: DisplayFinishTime = {racer.DisplayFinishTime}");
+        }
+    }
+    
+    public string FormatFinishTime(string finishTime)
+    {
+        if (string.IsNullOrEmpty(finishTime) || _timeFormatMode == TimeFormatMode.Raw)
+        {
+            return finishTime;
+        }
+        
+        // Try to parse the finish time as seconds
+        if (double.TryParse(finishTime, out double totalSeconds))
+        {
+            int minutes = (int)(totalSeconds / 60);
+            double seconds = totalSeconds % 60;
+            
+            // Only show minutes if it's 1 or more
+            if (minutes > 0)
+            {
+                return $"{minutes}:{seconds:F3}";
+            }
+            else
+            {
+                return $"{seconds:F3}";
+            }
+        }
+        
+        return finishTime; // Return original if parsing fails
+    }
     
     // Clipboard commands
     [RelayCommand]
@@ -76,7 +175,7 @@ public partial class MainWindowViewModel : ViewModelBase
         // Add data rows
         foreach (var racer in Racers)
         {
-            sb.AppendLine($"{racer.Position},{racer.FirstName},{racer.LastName},{racer.Affiliation},{racer.FinishTime},{racer.LineNumber},{racer.RacerId},{racer.License},{racer.DeltaTime},{racer.ReacTime},{racer.Splits}");
+            sb.AppendLine($"{racer.Position},{racer.FirstName},{racer.LastName},{racer.Affiliation},{racer.FinishTimeRaw},{racer.LineNumber},{racer.RacerId},{racer.License},{racer.DeltaTime},{racer.ReacTime},{racer.Splits}");
         }
         
         await CopyToClipboard(sb.ToString());
@@ -86,6 +185,7 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         if (!string.IsNullOrEmpty(finishTime))
         {
+            // Copy the exact value that was displayed in the DataGrid
             await CopyToClipboard(finishTime, topLevel);
         }
     }
@@ -158,6 +258,8 @@ public partial class MainWindowViewModel : ViewModelBase
             // Add racers to the collection (they will be sorted by IComparable)
             foreach (var racer in race.Racers)
             {
+                // Initialize DisplayFinishTime based on current format mode
+                racer.DisplayFinishTime = _timeFormatMode == TimeFormatMode.Raw ? racer.FinishTimeRaw : racer.FinishTimeFormatted;
                 Racers.Add(racer);
             }
         }

@@ -4,6 +4,8 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:dg="using:Avalonia.Controls"
+        xmlns:models="using:LifTools.Models"
+        xmlns:converters="using:LifTools.Converters"
         mc:Ignorable="d" d:DesignWidth="1200" d:DesignHeight="800"
         x:Class="LifTools.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
@@ -15,6 +17,10 @@
              to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
         <vm:MainWindowViewModel/>
     </Design.DataContext>
+
+    <Window.Resources>
+        <converters:TimeFormatConverter x:Key="TimeFormatConverter"/>
+    </Window.Resources>
 
     <Grid>
         <Grid.RowDefinitions>
@@ -44,6 +50,22 @@
             <Button Content="Browse..." 
                     Click="BrowseButton_Click"
                     VerticalAlignment="Center"/>
+        </StackPanel>
+        
+        <!-- Time Format Toggle -->
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="10" HorizontalAlignment="Right">
+            <TextBlock Text="Time Format:" VerticalAlignment="Center" Margin="0,0,10,0"/>
+            <RadioButton Content="Seconds" 
+                        IsChecked="{Binding IsRawTimeFormat}" 
+                        GroupName="TimeFormat"
+                        VerticalAlignment="Center"
+                        Margin="0,0,10,0"
+                        Click="RawTimeFormat_Click"/>
+            <RadioButton Content="MM:SS.sss" 
+                        IsChecked="{Binding IsFormattedTimeFormat}" 
+                        GroupName="TimeFormat"
+                        VerticalAlignment="Center"
+                        Click="FormattedTimeFormat_Click"/>
         </StackPanel>
         
         <!-- Race Information -->
@@ -102,7 +124,7 @@
                                                 <ColumnDefinition Width="*"/>
                                                 <ColumnDefinition Width="Auto"/>
                                             </Grid.ColumnDefinitions>
-                                            <TextBlock Grid.Column="0" Text="{Binding FinishTime}" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                                            <TextBlock Grid.Column="0" Text="{Binding DisplayFinishTime}" VerticalAlignment="Center" Margin="0,0,5,0"/>
                                             <Button Grid.Column="1" 
                                                     Width="20" 
                                                     Height="20" 
@@ -110,7 +132,7 @@
                                                     Background="Transparent"
                                                     BorderThickness="0"
                                                     Click="CopyFinishTime_Click"
-                                                    Tag="{Binding FinishTime}">
+                                                    Tag="{Binding DisplayFinishTime}">
                                                 <Button.Content>
                                                     <TextBlock Text="📋" FontSize="12"/>
                                                 </Button.Content>

@@ -1,16 +1,33 @@
 using System;
+using System.ComponentModel;
 
 namespace LifTools.Models;
 
-public class Racer : IComparable<Racer>
+public class Racer : IComparable<Racer>, INotifyPropertyChanged
 {
+    public event PropertyChangedEventHandler? PropertyChanged;
+
     public Position Position { get; set; } = new Position(string.Empty);
     public int RacerId { get; set; }
     public int LineNumber { get; set; }
     public string LastName { get; set; } = string.Empty;
     public string FirstName { get; set; } = string.Empty;
     public string Affiliation { get; set; } = string.Empty;
-    public string FinishTime { get; set; } = string.Empty;
+    public string FinishTimeRaw { get; set; } = string.Empty;        // e.g., "69.622"
+    public string FinishTimeFormatted { get; set; } = string.Empty;  // e.g., "1:09.622"
+    private string _displayFinishTime = string.Empty;
+    public string DisplayFinishTime 
+    { 
+        get => _displayFinishTime;
+        set
+        {
+            if (_displayFinishTime != value)
+            {
+                _displayFinishTime = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(DisplayFinishTime)));
+            }
+        }
+    }
     public string License { get; set; } = string.Empty;
     public string DeltaTime { get; set; } = string.Empty;
     public string ReacTime { get; set; } = string.Empty;
@@ -24,7 +41,7 @@ public class Racer : IComparable<Racer>
 
     public override string ToString()
     {
-        return $"#{Position}: {FirstName} {LastName} ({Affiliation}) - {FinishTime} (Lane {LineNumber}, ID: {RacerId})";
+        return $"#{Position}: {FirstName} {LastName} ({Affiliation}) - {FinishTimeRaw} (Lane {LineNumber}, ID: {RacerId})";
     }
 
     public int CompareTo(Racer? other)

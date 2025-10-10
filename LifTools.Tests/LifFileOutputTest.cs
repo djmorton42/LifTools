@@ -38,7 +38,7 @@ public class LifFileOutputTest
             Console.WriteLine($"Position {racer.Position}:");
             Console.WriteLine($"  Name: {racer.FirstName} {racer.LastName}");
             Console.WriteLine($"  Affiliation: {racer.Affiliation}");
-            Console.WriteLine($"  Finish Time: {racer.FinishTime}");
+            Console.WriteLine($"  Finish Time: {racer.FinishTimeRaw}");
             Console.WriteLine($"  Delta Time: {racer.DeltaTime}");
             Console.WriteLine($"  Lane Number: {racer.LineNumber}");
             Console.WriteLine($"  Racer ID: {racer.RacerId}");
@@ -62,13 +62,13 @@ public class LifFileOutputTest
         Assert.Equal("Sofia", firstRacer.FirstName);
         Assert.Equal("King", firstRacer.LastName);
         Assert.Equal("Ottawa", firstRacer.Affiliation);
-        Assert.Equal("1:55.893", firstRacer.FinishTime);
+        Assert.Equal("1:55.893", firstRacer.FinishTimeRaw);
         
         var lastRacer = race.Racers[5];
         Assert.Equal("6", lastRacer.Position.Value);
         Assert.Equal("Evelyn", lastRacer.FirstName);
         Assert.Equal("Flores", lastRacer.LastName);
         Assert.Equal("Kingston", lastRacer.Affiliation);
-        Assert.Equal("1:59.225", lastRacer.FinishTime);
+        Assert.Equal("1:59.225", lastRacer.FinishTimeRaw);
     }
 }
