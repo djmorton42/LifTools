@@ -11,6 +11,7 @@
   <ItemGroup>
     <Folder Include="Models\" />
     <AvaloniaResource Include="Assets\**" />
+    <Content Include="..\VERSION.txt" CopyToOutputDirectory="PreserveNewest" Condition="Exists('..\VERSION.txt')" />
   </ItemGroup>
 
   <ItemGroup>

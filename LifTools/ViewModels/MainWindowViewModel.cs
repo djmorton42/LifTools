@@ -29,12 +29,14 @@ public partial class MainWindowViewModel : ViewModelBase
     private TimeFormatMode _timeFormatMode = TimeFormatMode.Raw;
     private readonly SettingsService _settingsService;
     private readonly RaceSplitService _raceSplitService;
+    private readonly IVersionService _versionService;
     private IList<object> _selectedRacers = new List<object>();
 
     public MainWindowViewModel()
     {
         _settingsService = new SettingsService();
         _raceSplitService = new RaceSplitService();
+        _versionService = new VersionService();
         LoadSettings();
     }
     
@@ -54,6 +56,17 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         get => _isLoading;
         set => SetProperty(ref _isLoading, value);
+    }
+    
+    public string Version => _versionService.GetVersion();
+    
+    public string Title
+    {
+        get
+        {
+            var version = _versionService.GetVersion();
+            return version == "Unknown" ? "LifTools" : $"LifTools v{version}";
+        }
     }
     
     public TimeFormatMode TimeFormatMode
