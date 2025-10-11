@@ -98,7 +98,9 @@
                                      IsReadOnly="True"
                                      Background="White"
                                      BorderBrush="LightGray"
-                                     BorderThickness="1">
+                                     BorderThickness="1"
+                                     SelectionMode="Extended"
+                                     SelectionChanged="DataGrid_SelectionChanged">
                             <dg:DataGrid.ContextMenu>
                                 <ContextMenu>
                                     <MenuItem Header="Copy Selected Cell" Command="{Binding CopySelectedCellCommand}"/>
@@ -151,6 +153,11 @@
         
         <!-- Status Bar -->
         <StackPanel Grid.Row="3" Orientation="Horizontal" Margin="10">
+            <Button Content="Split" 
+                    Command="{Binding SplitRaceCommand}"
+                    IsEnabled="{Binding CanSplitRace}"
+                    HorizontalAlignment="Left"
+                    Margin="0,0,10,0"/>
             <Button Content="Close" 
                     HorizontalAlignment="Right"
                     Click="CloseButton_Click"/>

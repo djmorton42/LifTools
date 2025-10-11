@@ -49,4 +49,13 @@ public partial class MainWindow : Window
         }
     }
 
+    private void DataGrid_SelectionChanged(object? sender, Avalonia.Controls.SelectionChangedEventArgs e)
+    {
+        if (sender is DataGrid dataGrid && DataContext is MainWindowViewModel viewModel)
+        {
+            var selectedItems = dataGrid.SelectedItems.Cast<object>().ToList();
+            viewModel.SelectedRacers = selectedItems;
+        }
+    }
+
 }
