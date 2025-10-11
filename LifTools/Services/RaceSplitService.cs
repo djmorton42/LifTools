@@ -8,9 +8,17 @@ using LifTools.Models;
 
 namespace LifTools.Services;
 
+public class SplitResult
+{
+    public string OriginalFilePath { get; set; } = string.Empty;
+    public string NewFilePath { get; set; } = string.Empty;
+    public string OriginalContent { get; set; } = string.Empty;
+    public string NewContent { get; set; } = string.Empty;
+}
+
 public class RaceSplitService
 {
-    public async Task<(string originalFilePath, string newFilePath)> SplitRaceAsync(
+    public SplitResult GenerateSplitContent(
         Race originalRace, 
         List<Racer> selectedRacers, 
         string newRaceNumber, 
@@ -50,11 +58,32 @@ public class RaceSplitService
         originalSplitRace.RaceInfo.RaceNumber = currentRaceNumber;
         newSplitRace.RaceInfo.RaceNumber = newRaceNumber;
 
-        // Write the files
-        await WriteRaceToFileAsync(originalSplitRace, originalSplitFilePath);
-        await WriteRaceToFileAsync(newSplitRace, newSplitFilePath);
+        // Generate content
+        var originalContent = GenerateRaceContent(originalSplitRace);
+        var newContent = GenerateRaceContent(newSplitRace);
 
-        return (originalSplitFilePath, newSplitFilePath);
+        return new SplitResult
+        {
+            OriginalFilePath = originalSplitFilePath,
+            NewFilePath = newSplitFilePath,
+            OriginalContent = originalContent,
+            NewContent = newContent
+        };
+    }
+
+    public async Task<(string originalFilePath, string newFilePath)> SplitRaceAsync(
+        Race originalRace, 
+        List<Racer> selectedRacers, 
+        string newRaceNumber, 
+        string originalFilePath)
+    {
+        var result = GenerateSplitContent(originalRace, selectedRacers, newRaceNumber, originalFilePath);
+        
+        // Write the files
+        await File.WriteAllTextAsync(result.OriginalFilePath, result.OriginalContent, Encoding.UTF8);
+        await File.WriteAllTextAsync(result.NewFilePath, result.NewContent, Encoding.UTF8);
+
+        return (result.OriginalFilePath, result.NewFilePath);
     }
 
     private Race CreateSplitRace(Race originalRace, List<Racer> selectedRacers, bool includeSelected)
@@ -86,14 +115,14 @@ public class RaceSplitService
         racersToInclude.Sort();
 
         // Update positions and lane numbers
-        UpdatePositionsAndLanes(racersToInclude);
+        UpdatePositionsAndLanes(racersToInclude, includeSelected);
 
         splitRace.Racers.AddRange(racersToInclude);
 
         return splitRace;
     }
 
-    private void UpdatePositionsAndLanes(List<Racer> racers)
+    private void UpdatePositionsAndLanes(List<Racer> racers, bool includeSelected)
     {
         for (int i = 0; i < racers.Count; i++)
         {
@@ -102,12 +131,16 @@ public class RaceSplitService
             // Update position to be sequential starting from 1
             racer.Position = new Position((i + 1).ToString());
             
-            // Update lane number to be sequential starting from 1
-            racer.LineNumber = i + 1;
+            // Only update lane numbers for the new split file (includeSelected = true)
+            // For the original file (includeSelected = false), keep original lane numbers
+            if (includeSelected)
+            {
+                racer.LineNumber = i + 1;
+            }
         }
     }
 
-    private async Task WriteRaceToFileAsync(Race race, string filePath)
+    private string GenerateRaceContent(Race race)
     {
         var lines = new List<string>();
 
@@ -122,8 +155,7 @@ public class RaceSplitService
             lines.Add(racerLine);
         }
 
-        // Write to file
-        await File.WriteAllLinesAsync(filePath, lines, Encoding.UTF8);
+        return string.Join(Environment.NewLine, lines);
     }
 
     private string CreateRaceInfoLine(RaceInfo raceInfo)
