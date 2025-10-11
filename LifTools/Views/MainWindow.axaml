@@ -123,7 +123,8 @@
                                                     Background="Transparent"
                                                     BorderThickness="0"
                                                     Click="CopyFinishTime_Click"
-                                                    Tag="{Binding DisplayFinishTime}">
+                                                    Tag="{Binding DisplayFinishTime}"
+                                                    ToolTip.Tip="Copy">
                                                 <Button.Content>
                                                     <TextBlock Text="📋" FontSize="12"/>
                                                 </Button.Content>
@@ -146,9 +147,6 @@
         
         <!-- Status Bar -->
         <StackPanel Grid.Row="3" Orientation="Horizontal" Margin="10">
-            <TextBlock Text="Ready" 
-                       Foreground="Green"
-                       Margin="0,0,20,0"/>
             <Button Content="Close" 
                     HorizontalAlignment="Right"
                     Click="CloseButton_Click"/>

@@ -62,13 +62,13 @@ public class LifFileOutputTest
         Assert.Equal("Sofia", firstRacer.FirstName);
         Assert.Equal("King", firstRacer.LastName);
         Assert.Equal("Ottawa", firstRacer.Affiliation);
-        Assert.Equal("1:55.893", firstRacer.FinishTimeRaw);
+        Assert.Equal("115.893", firstRacer.FinishTimeRaw);
         
         var lastRacer = race.Racers[5];
         Assert.Equal("6", lastRacer.Position.Value);
         Assert.Equal("Evelyn", lastRacer.FirstName);
         Assert.Equal("Flores", lastRacer.LastName);
         Assert.Equal("Kingston", lastRacer.Affiliation);
-        Assert.Equal("1:59.225", lastRacer.FinishTimeRaw);
+        Assert.Equal("119.225", lastRacer.FinishTimeRaw);
     }
 }

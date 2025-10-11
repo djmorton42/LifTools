@@ -13,6 +13,7 @@ using System.Windows.Input;
 using CommunityToolkit.Mvvm.Input;
 using System.Text;
 using Avalonia.Input;
+using LifTools.Services;
 
 namespace LifTools.ViewModels;
 
@@ -22,9 +23,12 @@ public partial class MainWindowViewModel : ViewModelBase
     private Race? _currentRace;
     private bool _isLoading;
     private TimeFormatMode _timeFormatMode = TimeFormatMode.Raw;
+    private readonly SettingsService _settingsService;
 
     public MainWindowViewModel()
     {
+        _settingsService = new SettingsService();
+        LoadSettings();
     }
     
     public string SelectedFilePath
@@ -56,6 +60,8 @@ public partial class MainWindowViewModel : ViewModelBase
                 // Notify that the boolean properties have changed
                 OnPropertyChanged(nameof(IsRawTimeFormat));
                 OnPropertyChanged(nameof(IsFormattedTimeFormat));
+                // Save settings when time format changes
+                SaveSettings();
             }
         }
     }
@@ -257,6 +263,24 @@ public partial class MainWindowViewModel : ViewModelBase
         {
             IsLoading = false;
         }
+    }
+
+    private void LoadSettings()
+    {
+        var settings = _settingsService.LoadSettings();
+        _timeFormatMode = settings.TimeFormatMode;
+        // Notify that the boolean properties have changed
+        OnPropertyChanged(nameof(IsRawTimeFormat));
+        OnPropertyChanged(nameof(IsFormattedTimeFormat));
+    }
+
+    private void SaveSettings()
+    {
+        var settings = new AppSettings
+        {
+            TimeFormatMode = _timeFormatMode
+        };
+        _settingsService.SaveSettings(settings);
     }
 
 }
