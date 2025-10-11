@@ -73,6 +73,129 @@ public class RaceSplitServiceContentGenerationTests
         Assert.Contains(newLines, line => line.StartsWith("1,1,1,First")); // Position 1, Lane 1 (renumbered)
     }
 
+    [Fact]
+    public void GenerateSplitContent_ShouldPreserveAlphaCodesInOriginalFile()
+    {
+        // Arrange
+        var service = new RaceSplitService();
+        var originalRace = CreateRaceWithAlphaCodes();
+        var selectedRacers = originalRace.Racers.Where(r => r.RacerId == 1 || r.RacerId == 2).ToList(); // Select numeric racers
+        var newRaceNumber = "21C";
+        var originalFilePath = "21B-1-01.lif";
+
+        // Act
+        var result = service.GenerateSplitContent(originalRace, selectedRacers, newRaceNumber, originalFilePath);
+
+        // Assert - Alpha codes should remain unchanged in original file
+        var originalLines = result.OriginalContent.Split(Environment.NewLine);
+        Assert.Contains(originalLines, line => line.StartsWith("1,3,3,Third")); // Position 1, Lane 3 (original)
+        Assert.Contains(originalLines, line => line.StartsWith("2,4,4,Fourth")); // Position 2, Lane 4 (original)
+        Assert.Contains(originalLines, line => line.StartsWith("DNS,5,5,DNS")); // DNS should remain DNS
+        Assert.Contains(originalLines, line => line.StartsWith("DNF,6,6,DNF")); // DNF should remain DNF
+    }
+
+    [Fact]
+    public void GenerateSplitContent_ShouldPreserveAlphaCodesInNewFile()
+    {
+        // Arrange
+        var service = new RaceSplitService();
+        var originalRace = CreateRaceWithAlphaCodes();
+        var selectedRacers = originalRace.Racers.Where(r => r.RacerId == 5 || r.RacerId == 6).ToList(); // Select alpha code racers
+        var newRaceNumber = "21C";
+        var originalFilePath = "21B-1-01.lif";
+
+        // Act
+        var result = service.GenerateSplitContent(originalRace, selectedRacers, newRaceNumber, originalFilePath);
+
+        // Assert - Alpha codes should remain unchanged in new file
+        var newLines = result.NewContent.Split(Environment.NewLine);
+        Assert.Contains(newLines, line => line.StartsWith("DNS,5,2,DNS")); // DNS should remain DNS, lane renumbered
+        Assert.Contains(newLines, line => line.StartsWith("DNF,6,1,DNF")); // DNF should remain DNF, lane renumbered
+    }
+
+    [Fact]
+    public void GenerateSplitContent_ShouldPreserveAlphaCodesWhenMixedWithNumericRacers()
+    {
+        // Arrange
+        var service = new RaceSplitService();
+        var originalRace = CreateRaceWithAlphaCodes();
+        var selectedRacers = originalRace.Racers.Where(r => r.RacerId == 1 || r.RacerId == 5).ToList(); // Select one numeric, one alpha
+        var newRaceNumber = "21C";
+        var originalFilePath = "21B-1-01.lif";
+
+        // Act
+        var result = service.GenerateSplitContent(originalRace, selectedRacers, newRaceNumber, originalFilePath);
+
+        // Assert - Mixed selection should preserve alpha codes
+        var newLines = result.NewContent.Split(Environment.NewLine);
+        Assert.Contains(newLines, line => line.StartsWith("1,1,1,First")); // Numeric position renumbered
+        Assert.Contains(newLines, line => line.StartsWith("DNS,5,2,DNS")); // Alpha code preserved, lane renumbered
+
+        var originalLines = result.OriginalContent.Split(Environment.NewLine);
+        Assert.Contains(originalLines, line => line.StartsWith("1,2,2,Second")); // Numeric position renumbered
+        Assert.Contains(originalLines, line => line.StartsWith("2,3,3,Third")); // Numeric position renumbered
+        Assert.Contains(originalLines, line => line.StartsWith("3,4,4,Fourth")); // Numeric position renumbered
+        Assert.Contains(originalLines, line => line.StartsWith("DNF,6,6,DNF")); // Alpha code preserved
+    }
+
+    private Race CreateRaceWithAlphaCodes()
+    {
+        var race = new Race
+        {
+            RaceInfo = new RaceInfo
+            {
+                RaceNumber = "21B",
+                Heat = 1,
+                Round = 1,
+                EventName = "Test Event",
+                StartTime = "10:00:00"
+            }
+        };
+
+        // Create racers with numeric positions
+        for (int i = 1; i <= 4; i++)
+        {
+            race.Racers.Add(new Racer
+            {
+                Position = new Position(i.ToString()),
+                RacerId = i,
+                LineNumber = i,
+                FirstName = $"Name{i}",
+                LastName = GetOrdinalName(i),
+                Affiliation = $"Club{i}",
+                FinishTimeRaw = (50.0 + i).ToString("F3"),
+                License = $"L{i:D3}"
+            });
+        }
+
+        // Add racers with alpha codes
+        race.Racers.Add(new Racer
+        {
+            Position = new Position("DNS"),
+            RacerId = 5,
+            LineNumber = 5,
+            FirstName = "DNS",
+            LastName = "DNS",
+            Affiliation = "Club5",
+            FinishTimeRaw = "0.000",
+            License = "L005"
+        });
+
+        race.Racers.Add(new Racer
+        {
+            Position = new Position("DNF"),
+            RacerId = 6,
+            LineNumber = 6,
+            FirstName = "DNF",
+            LastName = "DNF",
+            Affiliation = "Club6",
+            FinishTimeRaw = "0.000",
+            License = "L006"
+        });
+
+        return race;
+    }
+
     private Race CreateTestRace()
     {
         var race = new Race

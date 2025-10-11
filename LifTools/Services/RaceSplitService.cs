@@ -111,8 +111,27 @@ public class RaceSplitService
             ? selectedRacers.ToList() 
             : originalRace.Racers.Except(selectedRacers).ToList();
 
-        // Sort by position to maintain order
-        racersToInclude.Sort();
+        // Sort racers: numeric positions first (sorted numerically), then alpha codes (sorted alphabetically)
+        racersToInclude.Sort((a, b) =>
+        {
+            var aIsNumeric = a.Position.IsNumeric;
+            var bIsNumeric = b.Position.IsNumeric;
+            
+            // If both are numeric, sort numerically
+            if (aIsNumeric && bIsNumeric)
+            {
+                return int.Parse(a.Position.Value).CompareTo(int.Parse(b.Position.Value));
+            }
+            
+            // If both are alpha codes, sort alphabetically
+            if (!aIsNumeric && !bIsNumeric)
+            {
+                return string.Compare(a.Position.Value, b.Position.Value, StringComparison.OrdinalIgnoreCase);
+            }
+            
+            // Numeric positions come before alpha codes
+            return aIsNumeric ? -1 : 1;
+        });
 
         // Update positions and lane numbers
         UpdatePositionsAndLanes(racersToInclude, includeSelected);
@@ -128,7 +147,19 @@ public class RaceSplitService
         {
             var racer = racers[i];
             
-            // Update position to be sequential starting from 1
+            // Check if position is an alpha code (like DNS, DNF, etc.) - these should never change
+            if (!racer.Position.IsNumeric)
+            {
+                // Alpha codes should never be changed, regardless of split operation
+                // Only update lane numbers for the new split file
+                if (includeSelected)
+                {
+                    racer.LineNumber = i + 1;
+                }
+                continue;
+            }
+            
+            // Update position to be sequential starting from 1 (only for numeric positions)
             racer.Position = new Position((i + 1).ToString());
             
             // Only update lane numbers for the new split file (includeSelected = true)
