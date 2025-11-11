@@ -23,8 +23,8 @@ public class RaceSplitServiceContentGenerationTests
         var result = service.GenerateSplitContent(originalRace, selectedRacers, newRaceNumber, originalFilePath);
 
         // Assert - Verify file paths
-        Assert.Contains("21B-1-01-split.lif", result.OriginalFilePath);
-        Assert.Contains("21C-1-01-split.lif", result.NewFilePath);
+        Assert.Contains("21B-1-01.lif", result.OriginalFilePath);
+        Assert.Contains("21C-1-01.lif", result.NewFilePath);
 
         // Assert - Verify content is generated correctly
         Assert.NotEmpty(result.OriginalContent);

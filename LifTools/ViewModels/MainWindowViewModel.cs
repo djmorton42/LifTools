@@ -231,7 +231,7 @@ public partial class MainWindowViewModel : ViewModelBase
         {
             try
             {
-                var (originalFilePath, newFilePath) = await _raceSplitService.SplitRaceAsync(
+                var (originalFilePath, newFilePath, backupFilePath) = await _raceSplitService.SplitRaceAsync(
                     CurrentRace, 
                     selectedRacersList, 
                     dialogViewModel.NewRaceNumber, 
@@ -240,9 +240,14 @@ public partial class MainWindowViewModel : ViewModelBase
                 // Show success message
                 var originalFileName = Path.GetFileName(originalFilePath);
                 var newFileName = Path.GetFileName(newFilePath);
-                var message = $"Split completed successfully!\n\nFiles created:\n• {originalFileName}\n• {newFileName}";
+                var backupFileName = Path.GetFileName(backupFilePath);
+                var message = $"Split completed successfully!\n\nFiles created:\n• {backupFileName} (backup)\n• {originalFileName}\n• {newFileName}";
                 
                 await ShowMessageAsync(mainWindow, "Split Complete", message);
+                
+                // Load the first file (remaining racers)
+                SelectedFilePath = originalFilePath;
+                await LoadRaceAsync();
             }
             catch (System.Exception ex)
             {

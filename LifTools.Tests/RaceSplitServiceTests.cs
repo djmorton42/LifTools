@@ -37,16 +37,43 @@ public class RaceSplitServiceTests : IDisposable
         var selectedRacers = originalRace.Racers.Take(2).ToList();
         var newRaceNumber = "21C";
         var originalFilePath = Path.Combine(_tempDirectory, "21B-1-01.lif");
+        
+        // Create the original file first
+        await File.WriteAllTextAsync(originalFilePath, "test content");
 
         // Act
-        var (originalSplitPath, newSplitPath) = await _service.SplitRaceAsync(
+        var (originalSplitPath, newSplitPath, backupPath) = await _service.SplitRaceAsync(
             originalRace, selectedRacers, newRaceNumber, originalFilePath);
 
         // Assert
         Assert.True(File.Exists(originalSplitPath));
         Assert.True(File.Exists(newSplitPath));
-        Assert.Contains("21B-1-01-split.lif", originalSplitPath);
-        Assert.Contains("21C-1-01-split.lif", newSplitPath);
+        Assert.Contains("21B-1-01.lif", originalSplitPath);
+        Assert.Contains("21C-1-01.lif", newSplitPath);
+    }
+
+    [Fact]
+    public async Task SplitRaceAsync_ShouldCreateBackupFile()
+    {
+        // Arrange
+        var originalRace = CreateTestRace();
+        var selectedRacers = originalRace.Racers.Take(2).ToList();
+        var newRaceNumber = "21C";
+        var originalFilePath = Path.Combine(_tempDirectory, "21B-1-01.lif");
+        var backupFilePath = Path.Combine(_tempDirectory, "21B-1-01-original.lif");
+        
+        // Create the original file first with some content
+        var originalContent = "original file content";
+        await File.WriteAllTextAsync(originalFilePath, originalContent);
+
+        // Act
+        await _service.SplitRaceAsync(
+            originalRace, selectedRacers, newRaceNumber, originalFilePath);
+
+        // Assert - Verify backup file exists and contains original content
+        Assert.True(File.Exists(backupFilePath));
+        var backupContent = await File.ReadAllTextAsync(backupFilePath);
+        Assert.Equal(originalContent, backupContent);
     }
 
     [Fact]
@@ -57,9 +84,12 @@ public class RaceSplitServiceTests : IDisposable
         var selectedRacers = originalRace.Racers.Take(2).ToList();
         var newRaceNumber = "21C";
         var originalFilePath = Path.Combine(_tempDirectory, "21B-1-01.lif");
+        
+        // Create the original file first
+        await File.WriteAllTextAsync(originalFilePath, "test content");
 
         // Act
-        var (originalSplitPath, newSplitPath) = await _service.SplitRaceAsync(
+        var (originalSplitPath, newSplitPath, backupPath) = await _service.SplitRaceAsync(
             originalRace, selectedRacers, newRaceNumber, originalFilePath);
 
         // Assert - Check that the new race file has correct positions and lanes
@@ -87,9 +117,12 @@ public class RaceSplitServiceTests : IDisposable
         var selectedRacers = originalRace.Racers.Take(2).ToList();
         var newRaceNumber = "21C";
         var originalFilePath = Path.Combine(_tempDirectory, "21B-1-01.lif");
+        
+        // Create the original file first
+        await File.WriteAllTextAsync(originalFilePath, "test content");
 
         // Act
-        var (originalSplitPath, newSplitPath) = await _service.SplitRaceAsync(
+        var (originalSplitPath, newSplitPath, backupPath) = await _service.SplitRaceAsync(
             originalRace, selectedRacers, newRaceNumber, originalFilePath);
 
         // Assert - Check race numbers in the files
@@ -111,9 +144,12 @@ public class RaceSplitServiceTests : IDisposable
         var selectedRacers = originalRace.Racers.Take(2).ToList();
         var newRaceNumber = "21C";
         var originalFilePath = Path.Combine(_tempDirectory, "21B-1-01.lif");
+        
+        // Create the original file first
+        await File.WriteAllTextAsync(originalFilePath, "test content");
 
         // Act
-        var (originalSplitPath, newSplitPath) = await _service.SplitRaceAsync(
+        var (originalSplitPath, newSplitPath, backupPath) = await _service.SplitRaceAsync(
             originalRace, selectedRacers, newRaceNumber, originalFilePath);
 
         // Assert - Check that times are formatted as MM:SS.sss

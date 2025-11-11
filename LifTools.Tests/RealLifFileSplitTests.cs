@@ -53,12 +53,12 @@ public class RealLifFileSplitTests : IDisposable
         Assert.Contains(selectedRacers, r => r.RacerId == 116 && r.LineNumber == 6);
 
         // Act
-        var (originalSplitPath, newSplitPath) = await _service.SplitRaceAsync(
+        var (originalSplitPath, newSplitPath, backupPath) = await _service.SplitRaceAsync(
             originalRace, selectedRacers, "18C", _testLifFilePath);
 
         // Assert - Verify file names
-        Assert.Contains("18B-1-01-split.lif", originalSplitPath);
-        Assert.Contains("18C-1-01-split.lif", newSplitPath);
+        Assert.Contains("18B-1-01.lif", originalSplitPath);
+        Assert.Contains("18C-1-01.lif", newSplitPath);
 
         // Assert - Verify original split file content
         var originalLines = await File.ReadAllLinesAsync(originalSplitPath);
@@ -112,7 +112,7 @@ public class RealLifFileSplitTests : IDisposable
             .ToList();
 
         // Act
-        var (originalSplitPath, newSplitPath) = await _service.SplitRaceAsync(
+        var (originalSplitPath, newSplitPath, backupPath) = await _service.SplitRaceAsync(
             originalRace, selectedRacers, "18C", _testLifFilePath);
 
         // Assert - Check original split file positions and lanes
@@ -168,7 +168,7 @@ public class RealLifFileSplitTests : IDisposable
             .ToList();
 
         // Act
-        var (originalSplitPath, newSplitPath) = await _service.SplitRaceAsync(
+        var (originalSplitPath, newSplitPath, backupPath) = await _service.SplitRaceAsync(
             originalRace, selectedRacers, "18C", _testLifFilePath);
 
         // Assert - Check that times are formatted as MM:SS.sss
@@ -195,5 +195,31 @@ public class RealLifFileSplitTests : IDisposable
         var newFileContent = string.Join("\n", newLines);
         Assert.Contains("1:55.893", newFileContent); // Sofia King's time
         Assert.Contains("1:57.451", newFileContent); // Mila Watson's time
+    }
+
+    [Fact]
+    public async Task SplitRaceAsync_WithRealLifFile_ShouldCreateBackupFile()
+    {
+        // Arrange - Load the real LIF file
+        var dataProvider = new FileDataProvider(_testLifFilePath);
+        var parser = new LifParserService(dataProvider);
+        var originalRace = await parser.ParseRaceAsync();
+
+        var selectedRacers = originalRace.Racers
+            .Where(r => r.RacerId == 392 || r.RacerId == 116)
+            .ToList();
+
+        // Read original file content before split
+        var originalContent = await File.ReadAllTextAsync(_testLifFilePath);
+        var backupFilePath = Path.Combine(Path.GetDirectoryName(_testLifFilePath) ?? string.Empty, "18B-1-01-original.lif");
+
+        // Act
+        await _service.SplitRaceAsync(
+            originalRace, selectedRacers, "18C", _testLifFilePath);
+
+        // Assert - Verify backup file exists and contains original content
+        Assert.True(File.Exists(backupFilePath));
+        var backupContent = await File.ReadAllTextAsync(backupFilePath);
+        Assert.Equal(originalContent, backupContent);
     }
 }

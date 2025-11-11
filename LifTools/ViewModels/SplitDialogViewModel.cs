@@ -29,6 +29,9 @@ public partial class SplitDialogViewModel : ObservableObject
     private string _newFileName = string.Empty;
 
     [ObservableProperty]
+    private string _backupFileName = string.Empty;
+
+    [ObservableProperty]
     private bool _canSplit;
 
     private readonly List<Racer> _selectedRacers;
@@ -64,6 +67,7 @@ public partial class SplitDialogViewModel : ObservableObject
         {
             OriginalFileName = string.Empty;
             NewFileName = string.Empty;
+            BackupFileName = string.Empty;
             return;
         }
 
@@ -79,8 +83,9 @@ public partial class SplitDialogViewModel : ObservableObject
             var currentRaceNumber = parts[0];
             var newRaceNumber = NewRaceNumber;
 
-            OriginalFileName = $"{currentRaceNumber}-1-01-split{extension}";
-            NewFileName = $"{newRaceNumber}-1-01-split{extension}";
+            OriginalFileName = $"{currentRaceNumber}-1-01{extension}";
+            NewFileName = $"{newRaceNumber}-1-01{extension}";
+            BackupFileName = $"{fileNameWithoutExtension}-original{extension}";
         }
     }
 

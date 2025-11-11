@@ -85,9 +85,12 @@ public class RaceSplitServiceTimeFormatTests : IDisposable
         var selectedRacers = race.Racers.Take(2).ToList();
         var newRaceNumber = "18C";
         var originalFilePath = Path.Combine(_tempDirectory, "18B-1-01.lif");
+        
+        // Create the original file first (it will be backed up during split)
+        await File.WriteAllTextAsync(originalFilePath, "original content");
 
         // Act
-        var (originalSplitPath, newSplitPath) = await _service.SplitRaceAsync(
+        var (originalSplitPath, newSplitPath, backupPath) = await _service.SplitRaceAsync(
             race, selectedRacers, newRaceNumber, originalFilePath);
 
         // Assert - Check that times are formatted as MM:SS.sss

@@ -3,11 +3,11 @@
         xmlns:vm="using:LifTools.ViewModels"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="300"
+        mc:Ignorable="d" d:DesignWidth="500" d:DesignHeight="380"
         x:Class="LifTools.Views.SplitDialog"
         x:DataType="vm:SplitDialogViewModel"
         Title="Split Race"
-        Width="400" Height="300"
+        Width="500" Height="380"
         WindowStartupLocation="CenterOwner"
         CanResize="False">
 
@@ -64,8 +64,15 @@
         <!-- File Names Preview -->
         <StackPanel Grid.Row="4" Margin="0,0,0,15">
             <TextBlock Text="Files to be created:" FontWeight="Bold" Margin="0,0,0,5"/>
-            <TextBlock Text="{Binding OriginalFileName}" FontStyle="Italic"/>
-            <TextBlock Text="{Binding NewFileName}" FontStyle="Italic"/>
+            <TextBlock Text="{Binding BackupFileName, StringFormat='Original file will be backed up as: {0}'}" 
+                       FontStyle="Italic" 
+                       Margin="0,0,0,5"
+                       Foreground="Gray"/>
+            <TextBlock Text="{Binding OriginalFileName, StringFormat='Remaining racers: {0}'}" 
+                       FontStyle="Italic" 
+                       Margin="0,0,0,2"/>
+            <TextBlock Text="{Binding NewFileName, StringFormat='Split racers: {0}'}" 
+                       FontStyle="Italic"/>
         </StackPanel>
 
         <!-- Spacer -->

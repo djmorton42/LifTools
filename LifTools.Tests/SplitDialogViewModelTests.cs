@@ -36,14 +36,17 @@ public class SplitDialogViewModelTests
         viewModel.NewRaceNumber = "21C";
 
         // Assert
-        Assert.Equal("21B-1-01-split.lif", viewModel.OriginalFileName);
-        Assert.Equal("21C-1-01-split.lif", viewModel.NewFileName);
+        Assert.Equal("21B-1-01.lif", viewModel.OriginalFileName);
+        Assert.Equal("21C-1-01.lif", viewModel.NewFileName);
+        Assert.Equal("21B-1-01-original.lif", viewModel.BackupFileName);
         
         // Verify no path separators are included
         Assert.DoesNotContain(Path.DirectorySeparatorChar.ToString(), viewModel.OriginalFileName);
         Assert.DoesNotContain(Path.DirectorySeparatorChar.ToString(), viewModel.NewFileName);
+        Assert.DoesNotContain(Path.DirectorySeparatorChar.ToString(), viewModel.BackupFileName);
         Assert.DoesNotContain(Path.AltDirectorySeparatorChar.ToString(), viewModel.OriginalFileName);
         Assert.DoesNotContain(Path.AltDirectorySeparatorChar.ToString(), viewModel.NewFileName);
+        Assert.DoesNotContain(Path.AltDirectorySeparatorChar.ToString(), viewModel.BackupFileName);
     }
 
     [Fact]
@@ -70,5 +73,6 @@ public class SplitDialogViewModelTests
         // Assert
         Assert.Equal(string.Empty, viewModel.OriginalFileName);
         Assert.Equal(string.Empty, viewModel.NewFileName);
+        Assert.Equal(string.Empty, viewModel.BackupFileName);
     }
 }

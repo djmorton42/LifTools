@@ -43,9 +43,9 @@ public class RaceSplitService
 
         var currentRaceNumber = parts[0];
 
-        // Create file names
-        var originalSplitFileName = $"{currentRaceNumber}-1-01-split{extension}";
-        var newSplitFileName = $"{newRaceNumber}-1-01-split{extension}";
+        // Create file names (without -split suffix, using standard naming convention)
+        var originalSplitFileName = $"{currentRaceNumber}-1-01{extension}";
+        var newSplitFileName = $"{newRaceNumber}-1-01{extension}";
 
         var originalSplitFilePath = Path.Combine(directory, originalSplitFileName);
         var newSplitFilePath = Path.Combine(directory, newSplitFileName);
@@ -71,7 +71,7 @@ public class RaceSplitService
         };
     }
 
-    public async Task<(string originalFilePath, string newFilePath)> SplitRaceAsync(
+    public async Task<(string originalFilePath, string newFilePath, string backupFilePath)> SplitRaceAsync(
         Race originalRace, 
         List<Racer> selectedRacers, 
         string newRaceNumber, 
@@ -79,11 +79,22 @@ public class RaceSplitService
     {
         var result = GenerateSplitContent(originalRace, selectedRacers, newRaceNumber, originalFilePath);
         
-        // Write the files
+        // Step 1: Copy the original file to {original_file_name}-original.lif
+        var directory = Path.GetDirectoryName(originalFilePath) ?? string.Empty;
+        var originalFileName = Path.GetFileName(originalFilePath);
+        var fileNameWithoutExtension = Path.GetFileNameWithoutExtension(originalFileName);
+        var extension = Path.GetExtension(originalFileName);
+        var backupFilePath = Path.Combine(directory, $"{fileNameWithoutExtension}-original{extension}");
+        
+        File.Copy(originalFilePath, backupFilePath, overwrite: true);
+        
+        // Step 2: Write the remaining current racers to {current_race_number}-1-01.lif
         await File.WriteAllTextAsync(result.OriginalFilePath, result.OriginalContent, Encoding.UTF8);
+        
+        // Step 3: Write the racers being split out to {new_race_number}-1-01.lif
         await File.WriteAllTextAsync(result.NewFilePath, result.NewContent, Encoding.UTF8);
 
-        return (result.OriginalFilePath, result.NewFilePath);
+        return (result.OriginalFilePath, result.NewFilePath, backupFilePath);
     }
 
     private Race CreateSplitRace(Race originalRace, List<Racer> selectedRacers, bool includeSelected)
