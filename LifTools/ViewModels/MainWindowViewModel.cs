@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Threading.Tasks;
@@ -30,6 +31,7 @@ public partial class MainWindowViewModel : ViewModelBase
     private readonly SettingsService _settingsService;
     private readonly RaceSplitService _raceSplitService;
     private readonly IVersionService _versionService;
+    private readonly LoggingService _loggingService;
     private IList<object> _selectedRacers = new List<object>();
 
     public MainWindowViewModel()
@@ -37,6 +39,7 @@ public partial class MainWindowViewModel : ViewModelBase
         _settingsService = new SettingsService();
         _raceSplitService = new RaceSplitService();
         _versionService = new VersionService();
+        _loggingService = new LoggingService();
         LoadSettings();
     }
     
@@ -345,37 +348,94 @@ public partial class MainWindowViewModel : ViewModelBase
 
     public async Task SelectFileAsync(TopLevel topLevel)
     {
-        var options = new FilePickerOpenOptions
+        try
         {
-            Title = "Select LIF File",
-            AllowMultiple = false,
-            FileTypeFilter = new[]
+            var options = new FilePickerOpenOptions
             {
-                new FilePickerFileType("LIF Files")
+                Title = "Select LIF File",
+                AllowMultiple = false,
+                FileTypeFilter = new[]
                 {
-                    Patterns = new[] { "*.lif" }
-                },
-                new FilePickerFileType("All Files")
+                    new FilePickerFileType("LIF Files")
+                    {
+                        Patterns = new[] { "*.lif" }
+                    },
+                    new FilePickerFileType("All Files")
+                    {
+                        Patterns = new[] { "*.*" }
+                    }
+                }
+            };
+
+            var files = await topLevel.StorageProvider.OpenFilePickerAsync(options);
+            
+            if (files.Count == 0)
+            {
+                return;
+            }
+
+            var file = files[0];
+            
+            if (file == null)
+            {
+                _loggingService.LogError("File picker returned null file");
+                return;
+            }
+
+            if (file.Path == null)
+            {
+                _loggingService.LogError("File picker returned file with null Path");
+                return;
+            }
+
+            string? localPath = null;
+            try
+            {
+                localPath = file.Path.LocalPath;
+            }
+            catch (Exception ex)
+            {
+                _loggingService.LogError($"Failed to get LocalPath from file.Path. Path type: {file.Path.GetType().Name}, Path value: {file.Path}", ex);
+                
+                // Try alternative path access methods
+                try
                 {
-                    Patterns = new[] { "*.*" }
+                    localPath = file.Path.ToString();
+                }
+                catch (Exception ex2)
+                {
+                    _loggingService.LogError("Failed to get path using Path.ToString()", ex2);
                 }
             }
-        };
 
-        var files = await topLevel.StorageProvider.OpenFilePickerAsync(options);
-        
-        if (files.Count > 0)
-        {
-            var file = files[0];
-            SelectedFilePath = file.Path.LocalPath;
+            if (string.IsNullOrEmpty(localPath))
+            {
+                _loggingService.LogError("Could not determine file path from selected file");
+                return;
+            }
+
+            SelectedFilePath = localPath;
             await LoadRaceAsync();
+        }
+        catch (Exception ex)
+        {
+            _loggingService.LogError("Unexpected error in SelectFileAsync", ex);
         }
     }
 
     private async Task LoadRaceAsync()
     {
-        if (string.IsNullOrEmpty(SelectedFilePath) || !File.Exists(SelectedFilePath))
+        if (string.IsNullOrEmpty(SelectedFilePath))
+        {
+            _loggingService.LogWarning("LoadRaceAsync called with empty SelectedFilePath");
             return;
+        }
+
+        if (!File.Exists(SelectedFilePath))
+        {
+            _loggingService.LogError($"File does not exist: {SelectedFilePath}. File.Exists() returned false.");
+            return;
+        }
 
         try
         {
@@ -385,24 +445,44 @@ public partial class MainWindowViewModel : ViewModelBase
             var parser = new LifParserService(dataProvider);
             var race = await parser.ParseRaceAsync();
             
+            if (race == null)
+            {
+                _loggingService.LogError($"Parser returned null race for file: {SelectedFilePath}");
+                return;
+            }
+            
             CurrentRace = race;
             Racers.Clear();
             
             // Add racers to the collection (they will be sorted by IComparable)
-            foreach (var racer in race.Racers)
+            if (race.Racers != null)
             {
-                // Initialize DisplayFinishTime based on current format mode
-                racer.DisplayFinishTime = _timeFormatMode == TimeFormatMode.Raw ? racer.FinishTimeRaw : racer.FinishTimeFormatted;
-                Racers.Add(racer);
+                foreach (var racer in race.Racers)
+                {
+                    // Initialize DisplayFinishTime based on current format mode
+                    racer.DisplayFinishTime = _timeFormatMode == TimeFormatMode.Raw ? racer.FinishTimeRaw : racer.FinishTimeFormatted;
+                    Racers.Add(racer);
+                }
             }
             
             // Notify that CanSplitRace might have changed
             OnPropertyChanged(nameof(CanSplitRace));
         }
+        catch (FileNotFoundException ex)
+        {
+            _loggingService.LogError($"File not found while loading LIF file: {SelectedFilePath}", ex);
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            _loggingService.LogError($"Access denied while loading LIF file: {SelectedFilePath}", ex);
+        }
+        catch (IOException ex)
+        {
+            _loggingService.LogError($"IO error while loading LIF file: {SelectedFilePath}", ex);
+        }
         catch (System.Exception ex)
         {
-            // In a real application, you'd want to show this error to the user
-            System.Diagnostics.Debug.WriteLine($"Error loading LIF file: {ex.Message}");
+            _loggingService.LogError($"Unexpected error loading LIF file: {SelectedFilePath}", ex);
         }
         finally
         {

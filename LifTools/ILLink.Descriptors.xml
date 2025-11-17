@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  This file specifies which types to preserve for the .NET trimmer.
+  CsvHelper uses reflection extensively, so we need to preserve its types.
+-->
+<linker>
+  <assembly fullname="CsvHelper" preserve="all"/>
+  <!-- Preserve LifParserService which uses CsvHelper -->
+  <assembly fullname="LifTools" preserve="nothing">
+    <type fullname="LifTools.Models.LifParserService" preserve="all"/>
+  </assembly>
+</linker>
+
