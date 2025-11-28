@@ -24,8 +24,7 @@ dotnet publish LifTools/LifTools.csproj \
     --runtime win-x64 \
     --self-contained true \
     --output dist/win-x64/ \
-    --property:PublishSingleFile=true \
-    --property:PublishTrimmed=true
+    --property:PublishSingleFile=true
 
 # Publish for macOS x64
 echo "📦 Publishing for macOS x64..."
@@ -34,8 +33,7 @@ dotnet publish LifTools/LifTools.csproj \
     --runtime osx-x64 \
     --self-contained true \
     --output dist/osx-x64/ \
-    --property:PublishSingleFile=true \
-    --property:PublishTrimmed=true
+    --property:PublishSingleFile=true
 
 # Copy VERSION.txt to both distributions if it exists
 if [ -f "VERSION.txt" ]; then

@@ -27,7 +27,7 @@ public partial class MainWindowViewModel : ViewModelBase
     private string _selectedFilePath = string.Empty;
     private Race? _currentRace;
     private bool _isLoading;
-    private TimeFormatMode _timeFormatMode = TimeFormatMode.Raw;
+    private TimeFormatMode _timeFormatMode = TimeFormatMode.Formatted;
     private readonly SettingsService _settingsService;
     private readonly RaceSplitService _raceSplitService;
     private readonly IVersionService _versionService;

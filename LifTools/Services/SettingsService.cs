@@ -12,14 +12,13 @@ public class SettingsService
 
     public SettingsService()
     {
-        // Store settings in user's local application data directory
-        var appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-        var appFolder = Path.Combine(appDataPath, "LifTools");
+        // Store settings in the application directory
+        var appDirectory = AppContext.BaseDirectory;
         
         // Ensure the directory exists
-        Directory.CreateDirectory(appFolder);
+        Directory.CreateDirectory(appDirectory);
         
-        _settingsFilePath = Path.Combine(appFolder, "settings.json");
+        _settingsFilePath = Path.Combine(appDirectory, "settings.json");
         
         _jsonOptions = new JsonSerializerOptions
         {
@@ -63,5 +62,5 @@ public class SettingsService
 
 public class AppSettings
 {
-    public TimeFormatMode TimeFormatMode { get; set; } = TimeFormatMode.Raw;
+    public TimeFormatMode TimeFormatMode { get; set; } = TimeFormatMode.Formatted;
 }

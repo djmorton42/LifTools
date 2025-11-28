@@ -7,17 +7,11 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
   </PropertyGroup>
-  
-  <!-- Preserve CsvHelper assembly from trimming -->
-  <ItemGroup>
-    <TrimmerRootAssembly Include="CsvHelper" />
-  </ItemGroup>
 
   <ItemGroup>
     <Folder Include="Models\" />
     <AvaloniaResource Include="Assets\**" />
     <Content Include="..\VERSION.txt" CopyToOutputDirectory="PreserveNewest" Condition="Exists('..\VERSION.txt')" />
-    <TrimmerRootDescriptor Include="ILLink.Descriptors.xml" />
   </ItemGroup>
 
   <ItemGroup>
