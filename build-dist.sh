@@ -115,6 +115,18 @@ package_macos_app() {
 </dict>
 </plist>
 EOF
+
+    # The Linux publish output carries a broken ad-hoc signature. Gatekeeper
+    # treats that as a damaged app and does not offer Open Anyway. Re-signing
+    # on macOS seals the bundle so it is an ordinary unidentified-developer app.
+    if ! command -v codesign >/dev/null 2>&1; then
+        echo "❌ codesign is required to package the Mac app. Run this script on macOS."
+        exit 1
+    fi
+
+    echo "🔏 Ad-hoc signing ${app_root}..."
+    codesign --force --deep --sign - "$app_root"
+    codesign --verify --deep --strict --verbose=2 "$app_root"
 }
 
 package_macos_app osx-x64
@@ -126,14 +138,11 @@ cd dist/win-x64/
 zip -r ../../LifTools-win-x64.zip . -x "*.pdb" "*.xml"
 cd ../..
 
-# Create macOS distribution zips (the .app is the only payload)
+# Create macOS distribution zips (the .app is the only payload).
+# ditto keeps the code signature intact.
 echo "📁 Creating macOS distribution zips..."
-cd dist/osx-x64/
-zip -r -y ../../LifTools-macos-x64.zip LifTools.app -x "*.pdb" "*.xml"
-cd ../..
-cd dist/osx-arm64/
-zip -r -y ../../LifTools-macos-arm64.zip LifTools.app -x "*.pdb" "*.xml"
-cd ../..
+ditto -c -k --keepParent dist/osx-x64/LifTools.app LifTools-macos-x64.zip
+ditto -c -k --keepParent dist/osx-arm64/LifTools.app LifTools-macos-arm64.zip
 
 # Display results
 echo ""

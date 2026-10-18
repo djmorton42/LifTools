@@ -15,7 +15,9 @@ on:
 
 jobs:
   build-and-release:
-    runs-on: ubuntu-latest
+    # codesign only exists on macOS. Without it the .app is damaged and
+    # never shows up under Privacy & Security → Open Anyway.
+    runs-on: macos-latest
     permissions:
       contents: write  # needed for pushing tags and creating releases
 
@@ -24,6 +26,11 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0  # required to get tags
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
 
       - name: Get latest tag
         id: get_tag
