@@ -78,8 +78,10 @@ jobs:
           VERSION_WITHOUT_V=${VERSION_WITHOUT_V#v}
           mv LifTools-win-x64.zip "LifTools-v${VERSION_WITHOUT_V}-win-x64.zip"
           mv LifTools-macos-x64.zip "LifTools-v${VERSION_WITHOUT_V}-macos-x64.zip"
+          mv LifTools-macos-arm64.zip "LifTools-v${VERSION_WITHOUT_V}-macos-arm64.zip"
           echo "win_zip_name=LifTools-v${VERSION_WITHOUT_V}-win-x64.zip" >> $GITHUB_OUTPUT
           echo "macos_zip_name=LifTools-v${VERSION_WITHOUT_V}-macos-x64.zip" >> $GITHUB_OUTPUT
+          echo "macos_arm_zip_name=LifTools-v${VERSION_WITHOUT_V}-macos-arm64.zip" >> $GITHUB_OUTPUT
         id: rename_zips
 
       - name: Create new tag
@@ -97,5 +99,6 @@ jobs:
           files: |
             ${{ steps.rename_zips.outputs.win_zip_name }}
             ${{ steps.rename_zips.outputs.macos_zip_name }}
+            ${{ steps.rename_zips.outputs.macos_arm_zip_name }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
